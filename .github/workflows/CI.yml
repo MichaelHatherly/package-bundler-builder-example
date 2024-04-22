@@ -1,0 +1,115 @@
+name: CI
+on:
+  merge_group:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+
+concurrency:
+  # Skip intermediate builds: all builds except for builds on the `master` branch
+  # Cancel intermediate builds: only pull request builds
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.ref != 'refs/heads/main' || github.run_number }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
+permissions:
+  contents: read
+
+jobs:
+  finalize:
+    timeout-minutes: 10
+    needs: [build, test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo build: ${{ needs.build.result }}
+          echo test: ${{ needs.test.result }}
+      - run: exit 1
+        if: |
+          (needs.build.result != 'success') ||
+          (needs.test.result != 'success')
+
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633
+        with:
+          persist-credentials: false
+
+      - uses: julia-actions/install-juliaup@5e96cfab3bb0500aa42f2843f46c24b91cfcc3cd
+        with:
+          julia-version: "1.10.2"
+
+      - run: |
+            juliaup default 1.10.2
+
+      - run: julia --project=. -e 'import Pkg; Pkg.instantiate()'
+
+      - run: julia --project=. instantiate.jl
+
+      - run: julia --project=. bundle.jl
+        env:
+          PRIVATE_KEY_BASE64: ${{ secrets.PRIVATE_KEY_BASE64 }}
+          PUBLIC_KEY_BASE64: ${{ secrets.PUBLIC_KEY_BASE64 }}
+
+      - uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3
+        with:
+          name: PackageBundlerExampleRegistry
+          path: build/PackageBundlerExampleRegistry
+
+  test:
+    needs: [build]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    env:
+      JULIA_PKG_SERVER: "pkg.julialang.org"
+      JULIA_DEPOT_PATH: ${{ github.workspace }}/CustomJuliaDepot
+      CUSTOM_PACKAGE_BUNDLE: ${{ github.workspace }}/PackageBundlerExampleRegistry
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+        version:
+          - { julia: "1.10.1", project: "@bundled@1.0.0" }
+          - { julia: "1.10.2", project: "@bundled@1.1.0" }
+    
+    steps:
+
+      - uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427
+        with:
+          name: PackageBundlerExampleRegistry
+          path: ${{ env.CUSTOM_PACKAGE_BUNDLE }}
+
+      - uses: julia-actions/setup-julia@f2258781c657ad9b4b88072c5eeaf9ec8c370874
+        with:
+          version: ${{ matrix.version.julia }}
+
+      # Ensure that the General registry is added, since this is a non-standard depot.
+      - run: julia -e 'import Pkg; Pkg.Registry.add(Pkg.Registry.DEFAULT_REGISTRIES)'
+      
+      - run: ls -R ${JULIA_DEPOT_PATH?:}
+        shell: bash
+
+      - run: julia --startup-file=no ${CUSTOM_PACKAGE_BUNDLE?:}/registry/install.jl
+        shell: bash
+
+      - run: julia --startup-file=no --project=${{ matrix.version.project }} -e 'import Pkg; Pkg.status(); Pkg.resolve()'
+
+      - run: julia --startup-file=no --project=${{ matrix.version.project }} -e 'import Pkg; Pkg.status(); Pkg.precompile()'
+
+      - run: julia --startup-file=no --project=${{ matrix.version.project }} -e 'import CairoMakie'
+
+      - run: julia --startup-file=no ${JULIA_DEPOT_PATH?:}/registries/PackageBundlerExampleRegistry/remove.jl
+        shell: bash
+
+      - run: rm -rf ${JULIA_DEPOT_PATH?:}
+        shell: bash
+        if: always()

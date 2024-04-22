@@ -1,0 +1,15 @@
+name = "PackageBundlerExampleRegistry"
+uuid = "90a320f3-05ce-182c-5a7d-cbdad425170e"
+environments = [
+    "environments/bundled@v1.0.0",
+    "environments/bundled@v1.1.0",
+]
+outputs = [
+    "build/PackageBundlerExampleRegistry",
+]
+key = "key"
+clean = true
+multiplexers = ["juliaup"]
+
+[packages]
+"13f3f980-e62b-5c42-98c6-ff1f3baf88f0" = "CairoMakie"
