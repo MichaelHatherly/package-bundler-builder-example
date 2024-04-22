@@ -78,8 +78,8 @@ jobs:
           - windows-latest
           - macos-latest
         version:
-          - { julia: "1.10.1", project: "@bundled@1.0.0" }
-          - { julia: "1.10.2", project: "@bundled@1.1.0" }
+          - { julia: "1.10.1", project: "@bundled@v1.0.0" }
+          - { julia: "1.10.2", project: "@bundled@v1.1.0" }
     
     steps:
 
