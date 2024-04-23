@@ -6,6 +6,7 @@ environments = [
 ]
 outputs = [
     "build/PackageBundlerExampleRegistry",
+    "build/PackageBundlerExampleRegistryArtifacts/Artifacts.toml",
 ]
 key = "key"
 clean = true

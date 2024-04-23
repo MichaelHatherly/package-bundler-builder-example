@@ -7,6 +7,12 @@ on:
       - main
     tags:
       - "*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The version to release."
+        required: true
+        type: string
 
 concurrency:
   # Skip intermediate builds: all builds except for builds on the `master` branch
@@ -20,17 +26,19 @@ permissions:
 jobs:
   finalize:
     timeout-minutes: 10
-    needs: [build, test]
+    needs: [build, test, release]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - run: |
           echo build: ${{ needs.build.result }}
           echo test: ${{ needs.test.result }}
+          echo release: ${{ needs.release.result }}
       - run: exit 1
         if: |
           (needs.build.result != 'success') ||
-          (needs.test.result != 'success')
+          (needs.test.result != 'success') ||
+          (needs.release.result != 'success')
 
   build:
     runs-on: ubuntu-latest
@@ -56,11 +64,17 @@ jobs:
         env:
           PRIVATE_KEY_BASE64: ${{ secrets.PRIVATE_KEY_BASE64 }}
           PUBLIC_KEY_BASE64: ${{ secrets.PUBLIC_KEY_BASE64 }}
+          ARTIFACTS_URL: "https://github.com/MichaelHatherly/package-bundler-builder-example/releases/download/${{ inputs.version }}"
 
       - uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3
         with:
           name: PackageBundlerExampleRegistry
           path: build/PackageBundlerExampleRegistry
+
+      - uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3
+        with:
+          name: PackageBundlerExampleRegistryArtifacts
+          path: build/PackageBundlerExampleRegistryArtifacts
 
   test:
     needs: [build]
@@ -113,3 +127,46 @@ jobs:
       - run: rm -rf ${JULIA_DEPOT_PATH?:}
         shell: bash
         if: always()
+
+  release:
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      ARTIFACTS_PATH: ${{ github.workspace }}/PackageBundlerExampleRegistryArtifacts
+
+    steps:
+      - uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427
+        with:
+          name: PackageBundlerExampleRegistryArtifacts
+          path: ${{ env.ARTIFACTS_PATH }}
+
+      - run: ls -R ${{ env.ARTIFACTS_PATH }}
+
+      - name: Create Release
+        if: github.event_name == 'workflow_dispatch'
+        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5
+        with:
+          artifacts: "${{ env.ARTIFACTS_PATH }}/*.tar.gz"
+          tag: ${{ inputs.version }}
+
+      - uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f
+        with:
+          repository: "MichaelHatherly/package-bundler-provider-example"
+          path: "package-bundler-provider-example"
+          persist-credentials: false
+
+      - run: ls -R package-bundler-provider-example
+
+      - run: cp ${{ env.ARTIFACTS_PATH }}/Artifacts.toml package-bundler-provider-example/Artifacts.toml
+
+      - run: |
+          cd package-bundler-provider-example
+          git diff --color=always
+
+      - uses: peter-evans/create-pull-request@9153d834b60caba6d51c9b9510b087acf9f33f83
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          path: "package-bundler-provider-example"
