@@ -97,8 +97,8 @@ version = "3.0.13+1"
 
 [[deps.PackageBundler]]
 deps = ["Artifacts", "Base64", "CodecZlib", "OpenSSL_jll", "Pkg", "SHA", "Scratch", "Serialization", "TOML", "Tar"]
-git-tree-sha1 = "d3e5a8dce06f669cb5adfd43ddc869a81ad4b520"
-repo-rev = "0e77cdce1ae6edfb4f04bb63b68895e1e6e8017b"
+git-tree-sha1 = "7fb4f6ee9e9aba679cbd1d66a8a8ffd1e34f861b"
+repo-rev = "4a01f01172630fe7e8b8bb97cb8c2045e6b6314e"
 repo-url = "https://github.com/PumasAI/PackageBundler.jl"
 uuid = "01dfd1c3-b979-42ff-bf83-321ae6244111"
 version = "0.1.0"
