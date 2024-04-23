@@ -154,6 +154,7 @@ jobs:
 
       - uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f
         with:
+          token: ${{ secrets.PACKAGE_BUNDLER_PROVIDER_PAT }}
           repository: "MichaelHatherly/package-bundler-provider-example"
           path: "package-bundler-provider-example"
           persist-credentials: false
@@ -169,4 +170,5 @@ jobs:
       - uses: peter-evans/create-pull-request@9153d834b60caba6d51c9b9510b087acf9f33f83
         if: github.event_name == 'workflow_dispatch'
         with:
+          token: ${{ secrets.PACKAGE_BUNDLER_PROVIDER_PAT }}
           path: "package-bundler-provider-example"
