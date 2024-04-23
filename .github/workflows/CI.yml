@@ -172,3 +172,8 @@ jobs:
         with:
           token: ${{ secrets.PACKAGE_BUNDLER_PROVIDER_PAT }}
           path: "package-bundler-provider-example"
+          title: "Update `Artifacts.toml` to version `${{ inputs.version }}`"
+          body: |
+            This PR updates the `Artifacts.toml` file to version
+            `${{ inputs.version }}` from the `package-bundler-builder-example`
+            repository.
