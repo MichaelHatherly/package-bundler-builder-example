@@ -98,7 +98,7 @@ jobs:
     
     steps:
 
-      - uses: actions/download-artifact@9c19ed7fe5d278cd354c7dfd5d3b88589c7e2395
+      - uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e
         with:
           name: PackageBundlerExampleRegistry
           path: ${{ env.CUSTOM_PACKAGE_BUNDLE }}
@@ -141,7 +141,7 @@ jobs:
       ARTIFACTS_PATH: ${{ github.workspace }}/PackageBundlerExampleRegistryArtifacts
 
     steps:
-      - uses: actions/download-artifact@9c19ed7fe5d278cd354c7dfd5d3b88589c7e2395
+      - uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e
         with:
           name: PackageBundlerExampleRegistryArtifacts
           path: ${{ env.ARTIFACTS_PATH }}
