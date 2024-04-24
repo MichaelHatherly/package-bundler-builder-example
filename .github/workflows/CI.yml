@@ -119,6 +119,8 @@ jobs:
       - run: julia --startup-file=no --project=${{ matrix.version.project }} -e 'import Pkg; Pkg.status(); Pkg.resolve()'
 
       - run: julia --startup-file=no --project=${{ matrix.version.project }} -e 'import Pkg; Pkg.status(); Pkg.precompile()'
+        env:
+          JULIA_NUM_PRECOMPILE_TASKS: "1"
 
       - run: julia --startup-file=no --project=${{ matrix.version.project }} -e 'import CairoMakie'
 
