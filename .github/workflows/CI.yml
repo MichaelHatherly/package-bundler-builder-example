@@ -45,7 +45,7 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
         with:
           persist-credentials: false
 
@@ -155,7 +155,7 @@ jobs:
           artifacts: "${{ env.ARTIFACTS_PATH }}/*.tar.gz"
           tag: ${{ inputs.version }}
 
-      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
         with:
           token: ${{ secrets.PACKAGE_BUNDLER_PROVIDER_PAT }}
           repository: "MichaelHatherly/package-bundler-provider-example"
