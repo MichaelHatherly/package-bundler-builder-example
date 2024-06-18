@@ -170,7 +170,7 @@ jobs:
           cd package-bundler-provider-example
           git diff --color=always
 
-      - uses: peter-evans/create-pull-request@6d6857d36972b65feb161a90e484f2984215f83e
+      - uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c
         if: github.event_name == 'workflow_dispatch'
         with:
           token: ${{ secrets.PACKAGE_BUNDLER_PROVIDER_PAT }}
