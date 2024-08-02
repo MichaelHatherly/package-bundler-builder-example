@@ -66,12 +66,12 @@ jobs:
           PUBLIC_KEY_BASE64: ${{ secrets.PUBLIC_KEY_BASE64 }}
           ARTIFACTS_URL: "https://github.com/MichaelHatherly/package-bundler-builder-example/releases/download/${{ inputs.version }}"
 
-      - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+      - uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029
         with:
           name: PackageBundlerExampleRegistry
           path: build/PackageBundlerExampleRegistry
 
-      - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+      - uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029
         with:
           name: PackageBundlerExampleRegistryArtifacts
           path: build/PackageBundlerExampleRegistryArtifacts
